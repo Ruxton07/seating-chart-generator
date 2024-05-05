@@ -1,35 +1,49 @@
 import { db } from "@/db/db.model";
 import { useLiveQuery } from "dexie-react-hooks";
-import React, { useState } from "react";
-import SidebarBox from "../sidebar/SidebarBox";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import SidebarBox from "../sidebar/Sidebar";
 import { Button, ButtonBase, Menu, MenuItem, Select } from "@mui/material";
 import { IoAddOutline } from "react-icons/io5";
 import { Add } from "@mui/icons-material";
-export default function CurrentPeriodDisplay() {
+import Dropdown from "../input/Dropdown";
+export default function CurrentPeriodDisplay(props: {
+  update(s: number): void;
+}) {
   const [selectedPeriod, setSelectedPeriod] = useState<number>(-1);
 
-  const currentPeriod = useLiveQuery(() => db.periods.get(selectedPeriod));
+  const allPeriods = useLiveQuery(() => db.periods.toArray());
+
+  const allPeriodNames = useMemo(
+    () => allPeriods?.map((a) => a.name) || [],
+    [allPeriods]
+  );
+
+  const createPeriod = useCallback(async () => {
+    const periodName = prompt("Enter period name");
+
+    if (!periodName) return;
+
+    const p = await db.periods.add({
+      name: periodName,
+    });
+
+    setSelectedPeriod(p);
+  }, []);
+
+  useEffect(() => {
+    props.update(selectedPeriod);
+  }, [selectedPeriod]);
 
   return (
-    <>
-      <SidebarBox>
-        <p>
-          <strong>{currentPeriod ? "Class" : "Select a Class"}</strong>
-        </p>
-
-        <p>
-          {currentPeriod
-            ? currentPeriod.name
-            : "Complete this step to continue"}
-        </p>
-      </SidebarBox>
-
-      <Menu open className="p-16">
-        <MenuItem value={"b"}>Ten</MenuItem>
-        <Button startIcon={<Add />} variant="contained">
-          New Class
-        </Button>
-      </Menu>
-    </>
+    <div>
+      <Dropdown
+        select={setSelectedPeriod}
+        defaultMessage="Class"
+        options={allPeriodNames}
+        selectMessage="Select a Class"
+        selected={selectedPeriod}
+        createNew={createPeriod}
+      />
+    </div>
   );
 }
