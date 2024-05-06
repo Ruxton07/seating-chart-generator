@@ -22,14 +22,41 @@ export default function MovableItem(props: {
 
   const draggableRef = useRef<HTMLDivElement>(null);
 
+  const [isSelect, setIsSelect] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
+
+  const TIME_TO_SELECT = 500;
+
+  const onSelect = useCallback(() => {
+    setIsSelect(true);
+
+    const onMouseDown = (e: MouseEvent) => {
+      console.log("myevent");
+
+      setIsSelect(false);
+
+      document.removeEventListener("mousedown", onMouseDown);
+    };
+
+    document.addEventListener("mousedown", onMouseDown);
+
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+    };
+  }, []);
   const onStartDrag = useCallback(
     (eInitial: React.MouseEvent) => {
       eInitial.stopPropagation();
       eInitial.preventDefault();
+      if (isSelect) return;
       setIsMouseDown(true);
       const startingX = eInitial.clientX;
       const startingY = eInitial.clientY;
+      let inSelectWindow = true;
+
+      setTimeout(() => {
+        inSelectWindow = false;
+      }, TIME_TO_SELECT);
 
       const onMouseMove = (e: MouseEvent) => {
         const deltaX = e.clientX - startingX;
@@ -43,6 +70,7 @@ export default function MovableItem(props: {
       };
 
       const onMouseUp = (e: MouseEvent) => {
+        if (inSelectWindow) onSelect();
         setIsMouseDown(false);
 
         document.removeEventListener("mousemove", onMouseMove);
@@ -59,7 +87,7 @@ export default function MovableItem(props: {
         document.removeEventListener("mouseup", onMouseUp);
       };
     },
-    [xPos, yPos, props.parameters]
+    [xPos, yPos, props.parameters, isSelect]
   );
   return (
     <div
@@ -69,16 +97,22 @@ export default function MovableItem(props: {
         top: `${yPos}%`,
       }}
     >
-      <div className="-translate-x-1/2 -translate-y-1/2 w-fit">
+      <div className="w-fit">
         <div style={{ transform: `scale(${scale})` }} className="w-fit">
           <div
             className={`group ${
-              isMouseDown
+              isSelect
+                ? "border-2 cursor-text border-dashed border-green-500"
+                : isMouseDown
                 ? "border-2 cursor-grabbing border-dashed border-sky-500"
                 : "cursor-pointer"
             }`}
           >
-            <div ref={draggableRef} onMouseDown={onStartDrag} className="p-2">
+            <div
+              ref={draggableRef}
+              onMouseDown={onStartDrag}
+              className="p-2 bg-red-100"
+            >
               {props.children}
             </div>
           </div>

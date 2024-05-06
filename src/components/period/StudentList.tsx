@@ -2,6 +2,7 @@ import { Student, db } from "@/db/db.model";
 import { useLiveQuery } from "dexie-react-hooks";
 import React, { useCallback } from "react";
 import StudentRow from "./StudentRow";
+import BulkAddDialog from "./BulkAddDialog";
 
 export default function StudentList(props: { periodId: number }) {
   const students = useLiveQuery(() =>
@@ -15,6 +16,7 @@ export default function StudentList(props: { periodId: number }) {
       seatingType: "ANYWHERE",
     });
   }, []);
+
   return (
     <div>
       <div className="flex flex-col gap-2">
@@ -38,6 +40,7 @@ export default function StudentList(props: { periodId: number }) {
       >
         Add Student
       </button>
+      <BulkAddDialog />
     </div>
   );
 }

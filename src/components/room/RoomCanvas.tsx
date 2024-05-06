@@ -56,8 +56,8 @@ export default function RoomCanvas() {
       const { clientX, clientY } = e;
       const { width, height, x, y } = canvasRef.current.getBoundingClientRect();
 
-      const newItemX = ((clientX - x) / width) * 100;
-      const newItemY = ((clientY - y) / height) * 100;
+      const newItemX = ((clientX - x) / width) * 100 - 5.33;
+      const newItemY = ((clientY - y) / height) * 100 - 5.33;
 
       const seatNames = items
         .filter((i) => i.type === "SEAT")
@@ -88,31 +88,33 @@ export default function RoomCanvas() {
   );
 
   return (
-    <div
-      style={{
-        width: width,
-        height: width * ASPECT_RATIO,
-      }}
-      ref={canvasRef}
-      onMouseDown={clickToCreate}
-      className="bg-slate-50 relative cursor-crosshair"
-    >
-      {items.map((item, idx) => {
-        console.log(item, itemParameters);
+    <div>
+      <div
+        style={{
+          width: width,
+          height: width * ASPECT_RATIO,
+        }}
+        ref={canvasRef}
+        onMouseDown={clickToCreate}
+        className="bg-slate-50 relative cursor-crosshair"
+      >
+        {items.map((item, idx) => {
+          console.log(item, itemParameters);
 
-        if (item.type === "SEAT") {
-          return <MovableSeat parameters={itemParameters} seat={item} />;
-        }
-        if (item.type === "LANDMARK") {
-          return (
-            <MovableLandmark parameters={itemParameters} landmark={item} />
-          );
-        }
+          if (item.type === "SEAT") {
+            return <MovableSeat parameters={itemParameters} seat={item} />;
+          }
+          if (item.type === "LANDMARK") {
+            return (
+              <MovableLandmark parameters={itemParameters} landmark={item} />
+            );
+          }
 
-        if (item.type === "TEMPORARY") {
-          return <MovableTemporary parameters={itemParameters} area={item} />;
-        }
-      })}
+          if (item.type === "TEMPORARY") {
+            return <MovableTemporary parameters={itemParameters} area={item} />;
+          }
+        })}
+      </div>
     </div>
   );
 }
