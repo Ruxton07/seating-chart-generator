@@ -6,8 +6,6 @@ import RoomSelector from "@/components/home/RoomSelector";
 import Tabs from "@/components/home/Tabs";
 import { useMemo, useState } from "react";
 
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
-
 export default function Home() {
   const [currentRoom, setCurrentRoom] = useState(-1);
   const [currentPeriod, setCurrentPeriod] = useState(-1);
@@ -34,14 +32,12 @@ export default function Home() {
     return returnable;
   }, [currentRoom, currentPeriod]);
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${roboto.className}`}
-    >
+    <div>
       <Sidebar>
         <Tabs tabs={tabs} currentTab={0}></Tabs>
         <RoomSelector update={setCurrentRoom} />
         <CurrentPeriodDisplay update={setCurrentPeriod} />
       </Sidebar>
-    </main>
+    </div>
   );
 }
