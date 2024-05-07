@@ -11,6 +11,7 @@ export default function MovableItem(props: {
   parameters: any;
   children: React.ReactNode;
   location: Location;
+  idx: number;
 }) {
   const scale = useMemo(
     () => props.parameters.canvasWidth / 750,
@@ -25,30 +26,67 @@ export default function MovableItem(props: {
   const [isSelect, setIsSelect] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
 
-  const TIME_TO_SELECT = 500;
+  const TIME_TO_SELECT = 300;
 
-  const onSelect = useCallback(() => {
-    setIsSelect(true);
+  useEffect(() => {
+    if (isSelect) {
+      const event = new CustomEvent("canvasItemSelectionChange", {
+        detail: props.idx,
+      });
+      document.dispatchEvent(event);
 
-    const onMouseDown = (e: MouseEvent) => {
-      console.log("myevent");
+      const onMouseDown = (e: MouseEvent) => {
+        let shouldReturn = false;
+        document.querySelectorAll(".do-not-deselect").forEach((element) => {
+          // @ts-ignore
+          if (e.target && element.contains(e.target)) {
+            shouldReturn = true;
+          }
+        });
 
-      setIsSelect(false);
+        if (shouldReturn) return;
+        setIsSelect(false);
+        const event = new CustomEvent("canvasItemSelectionChange", {
+          detail: -1,
+        });
+        document.dispatchEvent(event);
+        e.preventDefault();
+        e.stopPropagation();
 
-      document.removeEventListener("mousedown", onMouseDown);
-    };
+        document.removeEventListener("mousedown", onMouseDown);
+      };
 
-    document.addEventListener("mousedown", onMouseDown);
+      document.addEventListener("mousedown", onMouseDown);
 
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-    };
-  }, []);
+      const onChangeSelection = (e: CustomEvent) => {
+        if (e.detail !== props.idx) {
+          setIsSelect(false);
+        }
+
+        // @ts-ignore
+        document.removeEventListener(
+          "canvasItemSelectionChange",
+          onChangeSelection
+        );
+      };
+
+      // @ts-ignore
+      document.addEventListener("canvasItemSelectionChange", onChangeSelection);
+
+      return () => {
+        document.removeEventListener("mousedown", onMouseDown);
+        // @ts-ignore
+        document.removeEventListener(
+          "canvasItemSelectionChange",
+          onChangeSelection
+        );
+      };
+    }
+  }, [isSelect]);
   const onStartDrag = useCallback(
     (eInitial: React.MouseEvent) => {
       eInitial.stopPropagation();
       eInitial.preventDefault();
-      if (isSelect) return;
       setIsMouseDown(true);
       const startingX = eInitial.clientX;
       const startingY = eInitial.clientY;
@@ -62,6 +100,9 @@ export default function MovableItem(props: {
         const deltaX = e.clientX - startingX;
         const deltaY = e.clientY - startingY;
 
+        if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+          inSelectWindow = false;
+        }
         const newXPos = xPos + (deltaX / props.parameters.canvasWidth) * 100;
         const newYPos = yPos + (deltaY / props.parameters.canvasHeight) * 100;
 
@@ -70,7 +111,14 @@ export default function MovableItem(props: {
       };
 
       const onMouseUp = (e: MouseEvent) => {
-        if (inSelectWindow) onSelect();
+        if (isSelect) {
+          setIsSelect(false);
+
+          const event = new CustomEvent("canvasItemSelectionChange", {
+            detail: -1,
+          });
+          document.dispatchEvent(event);
+        } else if (inSelectWindow) setIsSelect(true);
         setIsMouseDown(false);
 
         document.removeEventListener("mousemove", onMouseMove);
@@ -91,30 +139,24 @@ export default function MovableItem(props: {
   );
   return (
     <div
-      className="absolute"
+      className="absolute pointer-events-none z-10 movable-item"
       style={{
         left: `${xPos}%`,
         top: `${yPos}%`,
       }}
     >
-      <div className="w-fit">
-        <div style={{ transform: `scale(${scale})` }} className="w-fit">
-          <div
-            className={`group ${
-              isSelect
-                ? "border-2 cursor-text border-dashed border-green-500"
-                : isMouseDown
-                ? "border-2 cursor-grabbing border-dashed border-sky-500"
-                : "cursor-pointer"
-            }`}
-          >
-            <div
-              ref={draggableRef}
-              onMouseDown={onStartDrag}
-              className="p-2 bg-red-100"
-            >
-              {props.children}
-            </div>
+      <div style={{ transform: `scale(${scale})` }} className="w-fit">
+        <div
+          className={`group pointer-events-auto ${
+            isSelect
+              ? "border-2 cursor-text border-dashed border-green-500"
+              : isMouseDown
+              ? "border-2 cursor-grabbing border-dashed border-sky-500"
+              : "border-2 border-transparent cursor-pointer"
+          }`}
+        >
+          <div ref={draggableRef} onMouseDown={onStartDrag} className="p-2">
+            {props.children}
           </div>
         </div>
       </div>

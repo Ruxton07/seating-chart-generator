@@ -9,6 +9,8 @@ import React, {
 import MovableSeat from "./MovableSeat";
 import MovableLandmark from "./MovableLandmark";
 import MovableTemporary from "./MovableTemporary";
+import Sidebar from "../sidebar/Sidebar";
+import ReferenceItem from "./ReferenceItem";
 
 export default function RoomCanvas() {
   const width = 500;
@@ -56,8 +58,8 @@ export default function RoomCanvas() {
       const { clientX, clientY } = e;
       const { width, height, x, y } = canvasRef.current.getBoundingClientRect();
 
-      const newItemX = ((clientX - x) / width) * 100 - 5.33;
-      const newItemY = ((clientY - y) / height) * 100 - 5.33;
+      const newItemX = ((clientX - x) / width) * 100 - 7.768;
+      const newItemY = ((clientY - y) / height) * 100 - 7.768;
 
       const seatNames = items
         .filter((i) => i.type === "SEAT")
@@ -78,14 +80,29 @@ export default function RoomCanvas() {
           type: "SEAT",
           label: `${maxSeatNumber + 1}`,
           location: {
-            x: newItemX,
-            y: newItemY,
+            x: Math.round(newItemX / 2) * 2,
+            y: Math.round(newItemY / 2) * 2,
           },
         },
       ]);
     },
     [items]
   );
+
+  const [selected, setSelected] = useState(-1);
+
+  useEffect(() => {
+    const c = (e: CustomEvent) => {
+      setSelected(e.detail);
+    };
+    // @ts-ignore
+    document.addEventListener("canvasItemSelectionChange", c);
+
+    return () => {
+      // @ts-ignore
+      document.removeEventListener("canvasItemSelectionChange", c);
+    };
+  });
 
   return (
     <div>
@@ -102,7 +119,9 @@ export default function RoomCanvas() {
           console.log(item, itemParameters);
 
           if (item.type === "SEAT") {
-            return <MovableSeat parameters={itemParameters} seat={item} />;
+            return (
+              <MovableSeat parameters={itemParameters} seat={item} idx={idx} />
+            );
           }
           if (item.type === "LANDMARK") {
             return (
@@ -114,6 +133,41 @@ export default function RoomCanvas() {
             return <MovableTemporary parameters={itemParameters} area={item} />;
           }
         })}
+        <ReferenceItem
+          parameters={itemParameters}
+          boundingClientRect={canvasRef.current?.getBoundingClientRect()}
+        />
+      </div>
+      <div className="do-not-deselect">
+        <Sidebar>
+          {items[selected] && items[selected].type === "SEAT" && (
+            <div>
+              <h1>{selected}</h1>
+              <input
+                className="p-4 text-lg bg-slate-100"
+                value={items[selected].label}
+                onChange={(e) => {
+                  setItems((itemsMod) => {
+                    const newItems = [...itemsMod];
+                    newItems[selected].label = e.target.value;
+                    return newItems;
+                  });
+                }}
+              ></input>
+              <button
+                onClick={() => {
+                  setItems((itemsMod) => {
+                    const newItems = [...itemsMod];
+                    newItems[selected].label = "ABC";
+                    return newItems;
+                  });
+                }}
+              >
+                Change
+              </button>
+            </div>
+          )}
+        </Sidebar>
       </div>
     </div>
   );
