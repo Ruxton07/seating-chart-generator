@@ -7,3 +7,7 @@
     text-wrap: balance;
   }
 }
+
+h1 {
+  @apply text-2xl font-medium my-2;
+}

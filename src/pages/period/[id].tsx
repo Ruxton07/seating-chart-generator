@@ -9,7 +9,7 @@ export default function PeriodEditor() {
   const router = useRouter();
 
   const periodId = useMemo(() => {
-    if (router.query.id) {
+    if (router.query.id != null) {
       const asNum = parseInt(`${router.query.id}`);
       if (!isNaN(asNum)) {
         return asNum;
@@ -30,5 +30,5 @@ export default function PeriodEditor() {
     // }
   }, []);
 
-  return <div>{period && <StudentList periodId={periodId} />}</div>;
+  return <div>{period != null && <StudentList periodId={periodId} />}</div>;
 }

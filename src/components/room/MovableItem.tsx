@@ -29,6 +29,22 @@ export default function MovableItem(props: {
   const TIME_TO_SELECT = 300;
 
   useEffect(() => {
+    const onChangeSelection = (e: CustomEvent) => {
+      setIsSelect(e.detail === props.idx);
+    };
+
+    // @ts-ignore
+    document.addEventListener("canvasItemSelectionChange", onChangeSelection);
+
+    return () => {
+      // @ts-ignore
+      document.removeEventListener(
+        "canvasItemSelectionChange",
+        onChangeSelection
+      );
+    };
+  }, []);
+  useEffect(() => {
     if (isSelect) {
       const event = new CustomEvent("canvasItemSelectionChange", {
         detail: props.idx,
@@ -58,28 +74,8 @@ export default function MovableItem(props: {
 
       document.addEventListener("mousedown", onMouseDown);
 
-      const onChangeSelection = (e: CustomEvent) => {
-        if (e.detail !== props.idx) {
-          setIsSelect(false);
-        }
-
-        // @ts-ignore
-        document.removeEventListener(
-          "canvasItemSelectionChange",
-          onChangeSelection
-        );
-      };
-
-      // @ts-ignore
-      document.addEventListener("canvasItemSelectionChange", onChangeSelection);
-
       return () => {
         document.removeEventListener("mousedown", onMouseDown);
-        // @ts-ignore
-        document.removeEventListener(
-          "canvasItemSelectionChange",
-          onChangeSelection
-        );
       };
     }
   }, [isSelect]);

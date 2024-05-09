@@ -1,4 +1,4 @@
-import { RoomCanvasItem, Seat } from "@/types/RoomCanvasItem";
+import { Landmark, RoomCanvasItem, Seat } from "@/types/RoomCanvasItem";
 import React, {
   useCallback,
   useEffect,
@@ -11,6 +11,8 @@ import MovableLandmark from "./MovableLandmark";
 import MovableTemporary from "./MovableTemporary";
 import Sidebar from "../sidebar/Sidebar";
 import ReferenceItem from "./ReferenceItem";
+import SeatTypeButton from "./SeatTypeButtons";
+import SeatTypeButtons from "./SeatTypeButtons";
 
 export default function RoomCanvas() {
   const width = 500;
@@ -125,7 +127,11 @@ export default function RoomCanvas() {
           }
           if (item.type === "LANDMARK") {
             return (
-              <MovableLandmark parameters={itemParameters} landmark={item} />
+              <MovableLandmark
+                parameters={itemParameters}
+                landmark={item}
+                idx={idx}
+              />
             );
           }
 
@@ -140,33 +146,56 @@ export default function RoomCanvas() {
       </div>
       <div className="do-not-deselect">
         <Sidebar>
-          {items[selected] && items[selected].type === "SEAT" && (
-            <div>
-              <h1>{selected}</h1>
-              <input
-                className="p-4 text-lg bg-slate-100"
-                value={items[selected].label}
-                onChange={(e) => {
-                  setItems((itemsMod) => {
-                    const newItems = [...itemsMod];
-                    newItems[selected].label = e.target.value;
-                    return newItems;
-                  });
-                }}
-              ></input>
-              <button
-                onClick={() => {
-                  setItems((itemsMod) => {
-                    const newItems = [...itemsMod];
-                    newItems[selected].label = "ABC";
-                    return newItems;
-                  });
-                }}
-              >
-                Change
-              </button>
-            </div>
-          )}
+          {items[selected] &&
+            (items[selected].type === "SEAT" ||
+              items[selected].type === "LANDMARK") && (
+              <div>
+                <h1>Seat</h1>
+                <div>
+                  <p>Seat Name</p>
+                  <input
+                    className="p-4 text-lg bg-slate-100"
+                    value={items[selected].label}
+                    onChange={(e) => {
+                      setItems((itemsMod) => {
+                        const newItems = [...itemsMod];
+                        newItems[selected].label = e.target.value;
+                        return newItems;
+                      });
+                    }}
+                  ></input>
+                </div>
+                <div>
+                  <p>Convert To</p>
+                  <SeatTypeButtons
+                    onChange={(newType) => {
+                      setItems((itemsMod) => {
+                        const newItems = [...itemsMod];
+                        if (newType === "seat") {
+                          newItems[selected].type = "SEAT";
+                          (newItems[selected] as Seat).label = "Seat";
+                        } else {
+                          newItems[selected].type = "LANDMARK";
+                          (newItems[selected] as Landmark).label = newType;
+                        }
+
+                        return newItems;
+                      });
+
+                      setTimeout(() => {
+                        console.log("firing");
+
+                        document.dispatchEvent(
+                          new CustomEvent("canvasItemSelectionChange", {
+                            detail: selected,
+                          })
+                        );
+                      }, 10);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
         </Sidebar>
       </div>
     </div>
