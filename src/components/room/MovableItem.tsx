@@ -12,6 +12,7 @@ export default function MovableItem(props: {
   children: React.ReactNode;
   location: Location;
   idx: number;
+  onMove?(location: Location): void;
 }) {
   const scale = useMemo(
     () => props.parameters.canvasWidth / 750,
@@ -21,12 +22,18 @@ export default function MovableItem(props: {
   const [xPos, setXPos] = useState(props.location.x);
   const [yPos, setYPos] = useState(props.location.y);
 
+  const locationRef = useRef(props.location);
+
   const draggableRef = useRef<HTMLDivElement>(null);
 
   const [isSelect, setIsSelect] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
 
   const TIME_TO_SELECT = 300;
+
+  useEffect(() => {
+    locationRef.current = { x: xPos, y: yPos };
+  }, [xPos, yPos]);
 
   useEffect(() => {
     const onChangeSelection = (e: CustomEvent) => {
@@ -79,6 +86,7 @@ export default function MovableItem(props: {
       };
     }
   }, [isSelect]);
+
   const onStartDrag = useCallback(
     (eInitial: React.MouseEvent) => {
       eInitial.stopPropagation();
@@ -102,11 +110,15 @@ export default function MovableItem(props: {
         const newXPos = xPos + (deltaX / props.parameters.canvasWidth) * 100;
         const newYPos = yPos + (deltaY / props.parameters.canvasHeight) * 100;
 
-        setXPos(Math.max(5, Math.min(95, newXPos)));
-        setYPos(Math.max(5, Math.min(95, newYPos)));
+        const OFFSET = 8.45;
+
+        setXPos(Math.max(8, Math.min(92, newXPos + OFFSET)) - OFFSET);
+        setYPos(Math.max(8, Math.min(92, newYPos + OFFSET)) - OFFSET);
       };
 
       const onMouseUp = (e: MouseEvent) => {
+        props.onMove?.(locationRef.current);
+
         if (isSelect) {
           setIsSelect(false);
 

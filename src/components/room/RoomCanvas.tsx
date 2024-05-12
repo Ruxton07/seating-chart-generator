@@ -14,11 +14,14 @@ import ReferenceItem from "./ReferenceItem";
 import SeatTypeButton from "./SeatTypeButtons";
 import SeatTypeButtons from "./SeatTypeButtons";
 
-export default function RoomCanvas() {
+export default function RoomCanvas(props: {
+  startingItems: RoomCanvasItem[];
+  setLayout(s: string): void;
+}) {
   const width = 500;
   const ASPECT_RATIO = 1;
 
-  const [items, setItems] = useState<RoomCanvasItem[]>([]);
+  const [items, setItems] = useState<RoomCanvasItem[]>(props.startingItems);
 
   const itemParameters = {
     zCurrent: 0,
@@ -26,34 +29,11 @@ export default function RoomCanvas() {
     canvasHeight: width * ASPECT_RATIO,
   };
 
-  useEffect(() => {
-    // setItems([
-    //   ...items,
-    //   {
-    //     type: "SEAT",
-    //     label: "1",
-    //     location: {
-    //       x: 25,
-    //       y: 50,
-    //     },
-    //   },
-    //   {
-    //     type: "LANDMARK",
-    //     label: "TV",
-    //     location: {
-    //       x: 25,
-    //       y: 20,
-    //     },
-    //   },
-    // ]);
-  }, []);
-
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const clickToCreate = useCallback(
     (e: React.MouseEvent) => {
       if (!canvasRef.current) return;
-      console.log(e.currentTarget);
 
       if (!e.currentTarget.isEqualNode(canvasRef.current)) return;
 
@@ -106,6 +86,37 @@ export default function RoomCanvas() {
     };
   });
 
+  useEffect(() => {
+    // separated by ^
+    // type$x$y$label
+
+    const parts: string[] = items.map((item, idx) => {
+      let p = "";
+
+      const x = Math.round(item.location.x * 10) / 10;
+      const y = Math.round(item.location.y * 10) / 10;
+
+      if (item.type === "SEAT") {
+        const label = item.label.replace(/(\$|\^)/g, "");
+        p = `s$${x}$${y}$${label}`;
+      } else if (item.type === "LANDMARK") {
+        const label = item.label.replace(/(\$|\^)/g, "");
+        p = `l$${x}$${y}$${label}`;
+      } else {
+        p = `o$${x}$${y}$${
+          item.type === "INSTRUCTION"
+            ? "i"
+            : item.type === "SUPERVISION"
+            ? "s"
+            : "t"
+        }`;
+      }
+      return p;
+    });
+
+    props.setLayout(parts.join("^"));
+  }, [items]);
+
   return (
     <div>
       <div
@@ -118,16 +129,27 @@ export default function RoomCanvas() {
         className="bg-slate-50 relative cursor-crosshair"
       >
         {items.map((item, idx) => {
-          console.log(item, itemParameters);
-
           if (item.type === "SEAT") {
             return (
-              <MovableSeat parameters={itemParameters} seat={item} idx={idx} />
+              <MovableSeat
+                key={idx}
+                parameters={itemParameters}
+                seat={item}
+                idx={idx}
+                onMove={(newLoc) => {
+                  setItems((oldItems) => {
+                    const newItems = [...oldItems];
+                    newItems[idx].location = newLoc;
+                    return newItems;
+                  });
+                }}
+              />
             );
           }
           if (item.type === "LANDMARK") {
             return (
               <MovableLandmark
+                key={idx}
                 parameters={itemParameters}
                 landmark={item}
                 idx={idx}
@@ -136,7 +158,13 @@ export default function RoomCanvas() {
           }
 
           if (item.type === "TEMPORARY") {
-            return <MovableTemporary parameters={itemParameters} area={item} />;
+            return (
+              <MovableTemporary
+                key={idx}
+                parameters={itemParameters}
+                area={item}
+              />
+            );
           }
         })}
         <ReferenceItem
@@ -183,8 +211,6 @@ export default function RoomCanvas() {
                       });
 
                       setTimeout(() => {
-                        console.log("firing");
-
                         document.dispatchEvent(
                           new CustomEvent("canvasItemSelectionChange", {
                             detail: selected,
