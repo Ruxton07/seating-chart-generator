@@ -8,8 +8,7 @@ export default function MovableLandmark(props: {
   idx: number;
 }) {
   const name = props.landmark.label;
-  const SPECIAL_NAMES = ["TV", "Teacher Desk", "Door", "Board"];
-  const showLabel = !SPECIAL_NAMES.includes(name);
+  const showLabel = true;
 
   return (
     <MovableItem
@@ -20,7 +19,7 @@ export default function MovableLandmark(props: {
       <div className="w-16 h-16 rounded-full text-2xl flex items-center justify-center bg-orange-100 text-center select-none relative">
         {showLabel && (
           <div className="absolute bottom-full mb-2 font-sans">
-            <p>Landmark</p>
+            <p>{props.landmark.label}</p>
           </div>
         )}
         {name === "TV" ? (

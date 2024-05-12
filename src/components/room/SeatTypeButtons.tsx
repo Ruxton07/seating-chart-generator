@@ -35,46 +35,54 @@ function SeatTypeButton(props: {
 }
 export default function SeatTypeButtons(props: {
   onChange(newSeatType: string): void;
+  seatType: string;
 }) {
+  const seatTypeMatchArray = [
+    "seat",
+    "$TV",
+    "$Teacher Desk",
+    "$Door",
+    "$Board",
+  ];
   return (
     <div className="flex flex-row gap-2 flex-wrap">
       <SeatTypeButton
         onClick={() => props.onChange("seat")}
         icon={<MdChair size={32} />}
         label="Seat"
-        selected={true}
+        selected={props.seatType === seatTypeMatchArray[0]}
       />
       <SeatTypeButton
         icon={<MdTv size={32} />}
         label="TV"
-        selected={false}
         onClick={() => props.onChange("TV")}
+        selected={props.seatType === seatTypeMatchArray[1]}
       />
       <SeatTypeButton
         icon={<MdDesk size={32} />}
         label="Teacher Desk"
         onClick={() => props.onChange("Teacher Desk")}
-        selected={false}
+        selected={props.seatType === seatTypeMatchArray[2]}
         smallText
       />
       <SeatTypeButton
         icon={<MdDoorFront size={32} />}
         onClick={() => props.onChange("Door")}
         label="Door"
-        selected={false}
+        selected={props.seatType === seatTypeMatchArray[3]}
       />
       <SeatTypeButton
         icon={<MdDraw size={32} />}
         label="Board"
-        selected={false}
+        selected={props.seatType === seatTypeMatchArray[4]}
         onClick={() => props.onChange("Board")}
       />
       <SeatTypeButton
-        onClick={() => props.onChange("Custom Landmark")}
+        onClick={() => props.onChange("Custom")}
         icon={<MdStar size={32} />}
         label="Custom Landmark"
         smallText
-        selected={false}
+        selected={!seatTypeMatchArray.includes(props.seatType)}
       />
     </div>
   );

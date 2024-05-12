@@ -31,6 +31,22 @@ export default function RoomCanvas(props: {
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  const maxSeatNumber = useMemo(() => {
+    const seatNames = items
+      .filter((i) => i.type === "SEAT")
+      .map((i) => (i as Seat).label);
+
+    let maxSeatNumber = 0;
+
+    seatNames.forEach((v) => {
+      const asNum = parseInt(v);
+      if (!isNaN(asNum) && maxSeatNumber < asNum) {
+        maxSeatNumber = asNum;
+      }
+    });
+
+    return maxSeatNumber;
+  }, [items]);
   const clickToCreate = useCallback(
     (e: React.MouseEvent) => {
       if (!canvasRef.current) return;
@@ -42,19 +58,6 @@ export default function RoomCanvas(props: {
 
       const newItemX = ((clientX - x) / width) * 100 - 7.768;
       const newItemY = ((clientY - y) / height) * 100 - 7.768;
-
-      const seatNames = items
-        .filter((i) => i.type === "SEAT")
-        .map((i) => (i as Seat).label);
-
-      let maxSeatNumber = 0;
-
-      seatNames.forEach((v) => {
-        const asNum = parseInt(v);
-        if (!isNaN(asNum) && maxSeatNumber < asNum) {
-          maxSeatNumber = asNum;
-        }
-      });
 
       setItems([
         ...items,
@@ -68,7 +71,7 @@ export default function RoomCanvas(props: {
         },
       ]);
     },
-    [items]
+    [items, maxSeatNumber]
   );
 
   const [selected, setSelected] = useState(-1);
@@ -84,7 +87,7 @@ export default function RoomCanvas(props: {
       // @ts-ignore
       document.removeEventListener("canvasItemSelectionChange", c);
     };
-  });
+  }, []);
 
   useEffect(() => {
     // separated by ^
@@ -196,12 +199,19 @@ export default function RoomCanvas(props: {
                 <div>
                   <p>Convert To</p>
                   <SeatTypeButtons
+                    seatType={
+                      items[selected].type === "SEAT"
+                        ? "seat"
+                        : `$${(items[selected] as Landmark).label}`
+                    }
                     onChange={(newType) => {
                       setItems((itemsMod) => {
                         const newItems = [...itemsMod];
                         if (newType === "seat") {
                           newItems[selected].type = "SEAT";
-                          (newItems[selected] as Seat).label = "Seat";
+                          (newItems[selected] as Seat).label = `${
+                            maxSeatNumber + 1
+                          }`;
                         } else {
                           newItems[selected].type = "LANDMARK";
                           (newItems[selected] as Landmark).label = newType;
