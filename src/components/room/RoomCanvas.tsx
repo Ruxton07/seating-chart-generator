@@ -1,4 +1,4 @@
-import { RoomCanvasItem, Seat } from "@/types/RoomCanvasItem";
+import { Landmark, RoomCanvasItem, Seat } from "@/types/RoomCanvasItem";
 import React, {
   useCallback,
   useEffect,
@@ -11,12 +11,17 @@ import MovableLandmark from "./MovableLandmark";
 import MovableTemporary from "./MovableTemporary";
 import Sidebar from "../sidebar/Sidebar";
 import ReferenceItem from "./ReferenceItem";
+import SeatTypeButton from "./SeatTypeButtons";
+import SeatTypeButtons from "./SeatTypeButtons";
 
-export default function RoomCanvas() {
+export default function RoomCanvas(props: {
+  startingItems: RoomCanvasItem[];
+  setLayout(s: string): void;
+}) {
   const width = 500;
   const ASPECT_RATIO = 1;
 
-  const [items, setItems] = useState<RoomCanvasItem[]>([]);
+  const [items, setItems] = useState<RoomCanvasItem[]>(props.startingItems);
 
   const itemParameters = {
     zCurrent: 0,
@@ -24,34 +29,27 @@ export default function RoomCanvas() {
     canvasHeight: width * ASPECT_RATIO,
   };
 
-  useEffect(() => {
-    // setItems([
-    //   ...items,
-    //   {
-    //     type: "SEAT",
-    //     label: "1",
-    //     location: {
-    //       x: 25,
-    //       y: 50,
-    //     },
-    //   },
-    //   {
-    //     type: "LANDMARK",
-    //     label: "TV",
-    //     location: {
-    //       x: 25,
-    //       y: 20,
-    //     },
-    //   },
-    // ]);
-  }, []);
-
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  const maxSeatNumber = useMemo(() => {
+    const seatNames = items
+      .filter((i) => i.type === "SEAT")
+      .map((i) => (i as Seat).label);
+
+    let maxSeatNumber = 0;
+
+    seatNames.forEach((v) => {
+      const asNum = parseInt(v);
+      if (!isNaN(asNum) && maxSeatNumber < asNum) {
+        maxSeatNumber = asNum;
+      }
+    });
+
+    return maxSeatNumber;
+  }, [items]);
   const clickToCreate = useCallback(
     (e: React.MouseEvent) => {
       if (!canvasRef.current) return;
-      console.log(e.currentTarget);
 
       if (!e.currentTarget.isEqualNode(canvasRef.current)) return;
 
@@ -60,19 +58,6 @@ export default function RoomCanvas() {
 
       const newItemX = ((clientX - x) / width) * 100 - 7.768;
       const newItemY = ((clientY - y) / height) * 100 - 7.768;
-
-      const seatNames = items
-        .filter((i) => i.type === "SEAT")
-        .map((i) => (i as Seat).label);
-
-      let maxSeatNumber = 0;
-
-      seatNames.forEach((v) => {
-        const asNum = parseInt(v);
-        if (!isNaN(asNum) && maxSeatNumber < asNum) {
-          maxSeatNumber = asNum;
-        }
-      });
 
       setItems([
         ...items,
@@ -86,7 +71,7 @@ export default function RoomCanvas() {
         },
       ]);
     },
-    [items]
+    [items, maxSeatNumber]
   );
 
   const [selected, setSelected] = useState(-1);
@@ -102,7 +87,38 @@ export default function RoomCanvas() {
       // @ts-ignore
       document.removeEventListener("canvasItemSelectionChange", c);
     };
-  });
+  }, []);
+
+  useEffect(() => {
+    // separated by ^
+    // type$x$y$label
+
+    const parts: string[] = items.map((item, idx) => {
+      let p = "";
+
+      const x = Math.round(item.location.x * 10) / 10;
+      const y = Math.round(item.location.y * 10) / 10;
+
+      if (item.type === "SEAT") {
+        const label = item.label.replace(/(\$|\^)/g, "");
+        p = `s$${x}$${y}$${label}`;
+      } else if (item.type === "LANDMARK") {
+        const label = item.label.replace(/(\$|\^)/g, "");
+        p = `l$${x}$${y}$${label}`;
+      } else {
+        p = `o$${x}$${y}$${
+          item.type === "INSTRUCTION"
+            ? "i"
+            : item.type === "SUPERVISION"
+            ? "s"
+            : "t"
+        }`;
+      }
+      return p;
+    });
+
+    props.setLayout(parts.join("^"));
+  }, [items]);
 
   return (
     <div>
@@ -116,21 +132,42 @@ export default function RoomCanvas() {
         className="bg-slate-50 relative cursor-crosshair"
       >
         {items.map((item, idx) => {
-          console.log(item, itemParameters);
-
           if (item.type === "SEAT") {
             return (
-              <MovableSeat parameters={itemParameters} seat={item} idx={idx} />
+              <MovableSeat
+                key={idx}
+                parameters={itemParameters}
+                seat={item}
+                idx={idx}
+                onMove={(newLoc) => {
+                  setItems((oldItems) => {
+                    const newItems = [...oldItems];
+                    newItems[idx].location = newLoc;
+                    return newItems;
+                  });
+                }}
+              />
             );
           }
           if (item.type === "LANDMARK") {
             return (
-              <MovableLandmark parameters={itemParameters} landmark={item} />
+              <MovableLandmark
+                key={idx}
+                parameters={itemParameters}
+                landmark={item}
+                idx={idx}
+              />
             );
           }
 
           if (item.type === "TEMPORARY") {
-            return <MovableTemporary parameters={itemParameters} area={item} />;
+            return (
+              <MovableTemporary
+                key={idx}
+                parameters={itemParameters}
+                area={item}
+              />
+            );
           }
         })}
         <ReferenceItem
@@ -140,33 +177,61 @@ export default function RoomCanvas() {
       </div>
       <div className="do-not-deselect">
         <Sidebar>
-          {items[selected] && items[selected].type === "SEAT" && (
-            <div>
-              <h1>{selected}</h1>
-              <input
-                className="p-4 text-lg bg-slate-100"
-                value={items[selected].label}
-                onChange={(e) => {
-                  setItems((itemsMod) => {
-                    const newItems = [...itemsMod];
-                    newItems[selected].label = e.target.value;
-                    return newItems;
-                  });
-                }}
-              ></input>
-              <button
-                onClick={() => {
-                  setItems((itemsMod) => {
-                    const newItems = [...itemsMod];
-                    newItems[selected].label = "ABC";
-                    return newItems;
-                  });
-                }}
-              >
-                Change
-              </button>
-            </div>
-          )}
+          {items[selected] &&
+            (items[selected].type === "SEAT" ||
+              items[selected].type === "LANDMARK") && (
+              <div>
+                <h1>Seat</h1>
+                <div>
+                  <p>Seat Name</p>
+                  <input
+                    className="p-4 text-lg bg-slate-100"
+                    value={items[selected].label}
+                    onChange={(e) => {
+                      setItems((itemsMod) => {
+                        const newItems = [...itemsMod];
+                        newItems[selected].label = e.target.value;
+                        return newItems;
+                      });
+                    }}
+                  ></input>
+                </div>
+                <div>
+                  <p>Convert To</p>
+                  <SeatTypeButtons
+                    seatType={
+                      items[selected].type === "SEAT"
+                        ? "seat"
+                        : `$${(items[selected] as Landmark).label}`
+                    }
+                    onChange={(newType) => {
+                      setItems((itemsMod) => {
+                        const newItems = [...itemsMod];
+                        if (newType === "seat") {
+                          newItems[selected].type = "SEAT";
+                          (newItems[selected] as Seat).label = `${
+                            maxSeatNumber + 1
+                          }`;
+                        } else {
+                          newItems[selected].type = "LANDMARK";
+                          (newItems[selected] as Landmark).label = newType;
+                        }
+
+                        return newItems;
+                      });
+
+                      setTimeout(() => {
+                        document.dispatchEvent(
+                          new CustomEvent("canvasItemSelectionChange", {
+                            detail: selected,
+                          })
+                        );
+                      }, 10);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
         </Sidebar>
       </div>
     </div>

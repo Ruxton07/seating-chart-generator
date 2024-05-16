@@ -11,6 +11,7 @@ export default function ReferenceItem(props: {
   const [xPos, setXPos] = useState(0);
   const [yPos, setYPos] = useState(0);
   const [show, setShow] = useState(false);
+  const [inRegion, setInRegion] = useState(false);
 
   useEffect(() => {
     if (!props.boundingClientRect) return;
@@ -26,6 +27,14 @@ export default function ReferenceItem(props: {
 
       setXPos(Math.round(newItemX / 2) * 2);
       setYPos(Math.round(newItemY / 2) * 2);
+
+      const OFFSET = 20 * scale;
+      setInRegion(
+        clientX - OFFSET > x &&
+          clientX < x + width - OFFSET * 1.5 &&
+          clientY - OFFSET > y &&
+          clientY < y + height - OFFSET * 1.5
+      );
     };
 
     document.addEventListener("mousemove", mouseMove);
@@ -36,7 +45,7 @@ export default function ReferenceItem(props: {
   return (
     <div
       className={`absolute pointer-events-none transition-opacity ${
-        show ? "block" : "opacity-20"
+        !inRegion ? "hidden" : show ? "block" : "opacity-20"
       }`}
       style={{
         left: `${xPos}%`,

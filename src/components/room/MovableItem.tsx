@@ -12,6 +12,7 @@ export default function MovableItem(props: {
   children: React.ReactNode;
   location: Location;
   idx: number;
+  onMove?(location: Location): void;
 }) {
   const scale = useMemo(
     () => props.parameters.canvasWidth / 750,
@@ -21,6 +22,8 @@ export default function MovableItem(props: {
   const [xPos, setXPos] = useState(props.location.x);
   const [yPos, setYPos] = useState(props.location.y);
 
+  const locationRef = useRef(props.location);
+
   const draggableRef = useRef<HTMLDivElement>(null);
 
   const [isSelect, setIsSelect] = useState(false);
@@ -28,6 +31,26 @@ export default function MovableItem(props: {
 
   const TIME_TO_SELECT = 300;
 
+  useEffect(() => {
+    locationRef.current = { x: xPos, y: yPos };
+  }, [xPos, yPos]);
+
+  useEffect(() => {
+    const onChangeSelection = (e: CustomEvent) => {
+      setIsSelect(e.detail === props.idx);
+    };
+
+    // @ts-ignore
+    document.addEventListener("canvasItemSelectionChange", onChangeSelection);
+
+    return () => {
+      // @ts-ignore
+      document.removeEventListener(
+        "canvasItemSelectionChange",
+        onChangeSelection
+      );
+    };
+  }, []);
   useEffect(() => {
     if (isSelect) {
       const event = new CustomEvent("canvasItemSelectionChange", {
@@ -58,31 +81,12 @@ export default function MovableItem(props: {
 
       document.addEventListener("mousedown", onMouseDown);
 
-      const onChangeSelection = (e: CustomEvent) => {
-        if (e.detail !== props.idx) {
-          setIsSelect(false);
-        }
-
-        // @ts-ignore
-        document.removeEventListener(
-          "canvasItemSelectionChange",
-          onChangeSelection
-        );
-      };
-
-      // @ts-ignore
-      document.addEventListener("canvasItemSelectionChange", onChangeSelection);
-
       return () => {
         document.removeEventListener("mousedown", onMouseDown);
-        // @ts-ignore
-        document.removeEventListener(
-          "canvasItemSelectionChange",
-          onChangeSelection
-        );
       };
     }
   }, [isSelect]);
+
   const onStartDrag = useCallback(
     (eInitial: React.MouseEvent) => {
       eInitial.stopPropagation();
@@ -106,11 +110,15 @@ export default function MovableItem(props: {
         const newXPos = xPos + (deltaX / props.parameters.canvasWidth) * 100;
         const newYPos = yPos + (deltaY / props.parameters.canvasHeight) * 100;
 
-        setXPos(Math.max(5, Math.min(95, newXPos)));
-        setYPos(Math.max(5, Math.min(95, newYPos)));
+        const OFFSET = 8.45;
+
+        setXPos(Math.max(8, Math.min(92, newXPos + OFFSET)) - OFFSET);
+        setYPos(Math.max(8, Math.min(92, newYPos + OFFSET)) - OFFSET);
       };
 
       const onMouseUp = (e: MouseEvent) => {
+        props.onMove?.(locationRef.current);
+
         if (isSelect) {
           setIsSelect(false);
 

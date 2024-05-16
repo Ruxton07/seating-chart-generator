@@ -42,11 +42,6 @@ export default function StudentRow(props: {
               props.update({
                 seatingType: SEATING_TYPES[i] as Student["seatingType"],
               });
-
-              console.log({
-                ...props.student,
-                seatingType: SEATING_TYPES[i] as Student["seatingType"],
-              });
             }}
           />
         </div>
