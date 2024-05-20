@@ -27,7 +27,7 @@ export default function Dropdown(props: {
         document.removeEventListener("click", l);
       };
     }
-  });
+  }, [isOpen]);
 
   return (
     <div className="relative" ref={wrapperRef}>
