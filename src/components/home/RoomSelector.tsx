@@ -27,7 +27,7 @@ export default function RoomSelector(props: { update(s: number): void }) {
       name: roomName,
     });
 
-    setSelectedRoom(p);
+    setSelectedRoom(p - 1);
   }, []);
 
   useEffect(() => {

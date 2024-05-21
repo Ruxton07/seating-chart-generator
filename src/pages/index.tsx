@@ -21,13 +21,13 @@ export default function Home() {
     if (currentRoom !== -1)
       returnable.push({
         label: "Room Editor",
-        link: `/room/${currentRoom}`,
+        link: `/room/${currentRoom + 1}`,
       });
 
     if (currentPeriod !== -1)
       returnable.push({
         label: "Class Editor",
-        link: `/period/${currentPeriod}`,
+        link: `/period/${currentPeriod + 1}`,
       });
     return returnable;
   }, [currentRoom, currentPeriod]);

@@ -27,7 +27,7 @@ export default function CurrentPeriodDisplay(props: {
       name: periodName,
     });
 
-    setSelectedPeriod(p);
+    setSelectedPeriod(p - 1);
   }, []);
 
   useEffect(() => {
