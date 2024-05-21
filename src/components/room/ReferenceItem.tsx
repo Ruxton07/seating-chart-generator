@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 export default function ReferenceItem(props: {
   parameters: any;
-  boundingClientRect: DOMRect;
+  boundingClientRect?: DOMRect;
 }) {
   const scale = useMemo(
     () => props.parameters.canvasWidth / 750,
@@ -17,6 +17,8 @@ export default function ReferenceItem(props: {
     if (!props.boundingClientRect) return;
 
     const mouseMove = (e: MouseEvent) => {
+      if (!props.boundingClientRect) return;
+
       // @ts-ignore
       setShow(!e.target?.closest(".movable-item"));
       const { clientX, clientY } = e;

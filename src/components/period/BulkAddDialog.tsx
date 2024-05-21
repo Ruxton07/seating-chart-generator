@@ -60,6 +60,7 @@ export default function BulkAddDialog() {
         </div>
       </Dialog>
       <button
+        className="button"
         onClick={() => {
           setOpen(true);
         }}
