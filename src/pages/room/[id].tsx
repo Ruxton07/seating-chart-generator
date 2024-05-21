@@ -1,4 +1,5 @@
 import RoomCanvas from "@/components/room/RoomCanvas";
+import TopBar from "@/components/sidebar/TopBar";
 import { db } from "@/db/db.model";
 import { RoomCanvasItem } from "@/types/RoomCanvasItem";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -80,19 +81,22 @@ export default function RoomEditor() {
     return items;
   }, [room?.layout]);
   return (
-    <div className="flex justify-start w-full">
-      {room && (
-        <RoomCanvas
-          startingItems={startingItems}
-          setLayout={(l) => {
-            console.log(l);
+    <div>
+      <TopBar text={"Editing " + room?.name} link="/"></TopBar>
+      <div className="flex justify-start w-full">
+        {room && (
+          <RoomCanvas
+            startingItems={startingItems}
+            setLayout={(l) => {
+              console.log(l);
 
-            db.rooms.update(roomId, {
-              layout: l,
-            });
-          }}
-        />
-      )}
+              db.rooms.update(roomId, {
+                layout: l,
+              });
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -7,7 +7,13 @@ import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { MdDoorFront, MdGroup, MdPerson, MdRefresh } from "react-icons/md";
+import {
+  MdDoorFront,
+  MdGroup,
+  MdHome,
+  MdPerson,
+  MdRefresh,
+} from "react-icons/md";
 
 export default function Genenator() {
   const router = useRouter();
@@ -192,6 +198,11 @@ export default function Genenator() {
                   <Link href={`/period/${periodId}`}>
                     <div className="w-full py-2 flex gap-2 items-center px-4 text-black border border-slate-200">
                       <MdGroup /> <p>Edit Period</p>
+                    </div>
+                  </Link>
+                  <Link href={`/`}>
+                    <div className="w-full py-2 flex gap-2 items-center px-4 text-black border border-slate-200">
+                      <MdHome /> <p>Back Home</p>
                     </div>
                   </Link>
                 </div>
