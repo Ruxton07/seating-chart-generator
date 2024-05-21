@@ -126,15 +126,37 @@ export default function Genenator() {
     const people = students.sort((a, b) => 0.5 - Math.random());
 
     console.log("random", people);
-    let idx = 0;
+    let studentIdx = 0;
+    let seatIdx = 0;
+
+    const seatsWithStudents = [];
+
+    const randomizedIdxs = startingItems
+      .filter((i) => i.type === "SEAT")
+      .map((_, idx) => idx)
+      .sort((a, b) => 0.5 - Math.random())
+      .slice(0, people.length);
+
+    console.log("ri", randomizedIdxs, startingItems, people.length);
 
     const randomizedSeating = startingItems.map((item) => {
       if (item.type === "SEAT") {
+        if (!randomizedIdxs.includes(seatIdx)) {
+          seatIdx++;
+          return {
+            ...item,
+            label: "",
+          };
+        }
+
         const newItem = {
           ...item,
-          label: (item.label = people[idx]?.name || ""),
+          label: (item.label = people[studentIdx]?.name || ""),
         };
-        idx++;
+
+        seatIdx++;
+
+        studentIdx++;
         return newItem;
       } else {
         return item;

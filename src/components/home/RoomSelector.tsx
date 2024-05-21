@@ -6,8 +6,11 @@ import { Button, ButtonBase, Menu, MenuItem, Select } from "@mui/material";
 import { IoAddOutline } from "react-icons/io5";
 import { Add } from "@mui/icons-material";
 import Dropdown from "../input/Dropdown";
-export default function RoomSelector(props: { update(s: number): void }) {
-  const [selectedRoom, setSelectedRoom] = useState<number>(-1);
+export default function RoomSelector(props: {
+  update(s: number): void;
+  current: number;
+}) {
+  const [selectedRoom, setSelectedRoom] = useState<number>(props.current);
 
   const allRooms = useLiveQuery(() => db.rooms.toArray());
 
