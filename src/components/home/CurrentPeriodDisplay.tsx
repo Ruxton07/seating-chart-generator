@@ -8,8 +8,9 @@ import { Add } from "@mui/icons-material";
 import Dropdown from "../input/Dropdown";
 export default function CurrentPeriodDisplay(props: {
   update(s: number): void;
+  current: number;
 }) {
-  const [selectedPeriod, setSelectedPeriod] = useState<number>(-1);
+  const [selectedPeriod, setSelectedPeriod] = useState<number>(props.current);
 
   const allPeriods = useLiveQuery(() => db.periods.toArray());
 
