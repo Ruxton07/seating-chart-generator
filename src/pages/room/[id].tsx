@@ -80,7 +80,7 @@ export default function RoomEditor() {
     return items;
   }, [room?.layout]);
   return (
-    <div>
+    <div className="flex justify-start w-full">
       {room && (
         <RoomCanvas
           startingItems={startingItems}

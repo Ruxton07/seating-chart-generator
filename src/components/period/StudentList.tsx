@@ -18,7 +18,7 @@ export default function StudentList(props: { periodId: number }) {
   }, []);
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto mt-8">
       <div className="flex flex-col gap-2">
         {students?.map((s, i) => (
           <StudentRow
@@ -31,6 +31,7 @@ export default function StudentList(props: { periodId: number }) {
         ))}
       </div>
       <button
+        className="button"
         onClick={() => {
           const name = prompt("Enter name");
           if (name) {

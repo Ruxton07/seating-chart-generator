@@ -11,3 +11,11 @@
 h1 {
   @apply text-2xl font-medium my-2;
 }
+
+h3 {
+  @apply mb-1;
+}
+
+.button {
+  @apply bg-slate-700 px-4 py-2 rounded-md text-white uppercase text-sm mr-2 my-4;
+}
