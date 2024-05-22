@@ -1,5 +1,6 @@
 import StudentList from "@/components/period/StudentList";
 import RoomCanvas from "@/components/room/RoomCanvas";
+import TopBar from "@/components/sidebar/TopBar";
 import { db } from "@/db/db.model";
 import { useLiveQuery } from "dexie-react-hooks";
 import React, { useRouter } from "next/router";
@@ -30,5 +31,10 @@ export default function PeriodEditor() {
     // }
   }, []);
 
-  return <div>{period != null && <StudentList periodId={periodId} />}</div>;
+  return (
+    <div>
+      <TopBar text={"Editing " + period?.name} link="/"></TopBar>
+      {period != null && <StudentList periodId={periodId} />}
+    </div>
+  );
 }
