@@ -8,7 +8,7 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import BlockDialog from "./BlockDialog";
+import ConflictDialog from "./ConflictDialog";
 
 export default function StudentRow(props: {
   student: Student;
@@ -26,7 +26,7 @@ export default function StudentRow(props: {
   const numSeparated = props.student.blocked?.length || 0;
   const numPaired = props.student.pairs?.length || 0;
 
-  const [blockedDialogIsOpen, setBlockedDialogIsOpen] = useState(false);
+  const [conflictDialogIsOpen, setConflictDialogIsOpen] = useState(false);
 
   return (
     <div className="bg-slate-100 flex justify-between items-center">
@@ -48,7 +48,7 @@ export default function StudentRow(props: {
         <div
           className="text-gray-400 italic py-2 pl-4 pr-6"
           onClick={() => {
-            setBlockedDialogIsOpen(true);
+            setConflictDialogIsOpen(true);
           }}
         >
           <p>
@@ -67,15 +67,15 @@ export default function StudentRow(props: {
       </div>
 
       <Dialog
-        open={blockedDialogIsOpen}
+        open={conflictDialogIsOpen}
         onClose={() => {
-          setBlockedDialogIsOpen(false);
+          setConflictDialogIsOpen(false);
         }}
       >
-        <BlockDialog
+        <ConflictDialog
           student={props.student}
           close={() => {
-            setBlockedDialogIsOpen(false);
+            setConflictDialogIsOpen(false);
           }}
         />
       </Dialog>

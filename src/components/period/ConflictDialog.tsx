@@ -101,7 +101,7 @@ function StudentRow(props: { student: Student; otherStudent: Student }) {
     </div>
   );
 }
-export default function BlockDialog(props: {
+export default function ConflictDialog(props: {
   student: Student;
   close(): void;
 }) {

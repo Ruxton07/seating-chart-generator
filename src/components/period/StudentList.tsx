@@ -1,6 +1,8 @@
 import { Student, db } from "@/db/db.model";
+import DeleteIcon from '@mui/icons-material/Delete';
+import ClearIcon from '@mui/icons-material/Clear';
 import { useLiveQuery } from "dexie-react-hooks";
-import React, { useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import StudentRow from "./StudentRow";
 import BulkAddDialog from "./BulkAddDialog";
 
@@ -9,12 +11,18 @@ export default function StudentList(props: { periodId: number }) {
     db.students.where("period").equals(props.periodId).toArray()
   );
 
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+
   const addStudent = useCallback((name: string) => {
     db.students.add({
       name,
       period: props.periodId,
       seatingType: "ANYWHERE",
     });
+  }, []);
+
+  const deleteStudent = useCallback((id: number) => {
+    db.students.delete(id);
   }, []);
 
   return (
@@ -30,18 +38,37 @@ export default function StudentList(props: { periodId: number }) {
           />
         ))}
       </div>
-      <button
-        className="button"
-        onClick={() => {
-          const name = prompt("Enter name");
-          if (name) {
-            addStudent(name);
-          }
-        }}
-      >
-        Add Student
-      </button>
-      <BulkAddDialog />
+      <div className="flex gap-2">
+        <button
+          className="button"
+          onClick={() => {
+            const name = prompt("Enter name");
+            if (name) {
+              addStudent(name);
+            }
+          }}
+        >
+          Add Student
+        </button>
+        <BulkAddDialog />
+        <button // Enables delete mode for specific students (any Student name that is clicked on should be removed)
+          className="button flex items-center justify-center"
+          onClick={() => {
+            setIsDeleteMode(!isDeleteMode);
+          }}
+        ><DeleteIcon className="mr-2" />{isDeleteMode ? 'Exit Delete Mode' : 'Delete Mode'}</button>
+        <button
+          className="button flex items-center justify-center"
+          onClick={() => {
+            const confirmation = prompt ("Are you sure you want to clear all students? This action is irreversible Type 'Clear' to confirm.");
+            if (confirmation === "Clear") {
+              db.students.clear();
+            } else {
+              alert("Invalid confirmation. Clear action cancelled.");
+            }
+          }}
+        ><ClearIcon className="mr-2" />Clear Students</button>
+      </div>
     </div>
   );
 }

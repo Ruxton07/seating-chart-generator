@@ -14,9 +14,9 @@ export default function Dropdown(props: {
 
   useEffect(() => {
     if (isOpen) {
-      const l = (e: MouseEvent) => {
+      const l = (e: MouseEvent) => { //ask Adrian why he's naming this l (what's the naming convention here)
         // @ts-ignore
-        if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        if (wrapperRef.current && !wrapperRef.current.contains(e.target)) { //ask Adrian about why he's using wrapperRef.current instead of isOpen (aren't they synonymous?)
           setIsOpen(false);
         }
       };
