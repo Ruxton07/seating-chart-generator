@@ -22,8 +22,9 @@ export default function StudentList(props: { periodId: number }) {
   }, []);
 
   const deleteStudent = useCallback((id: number) => {
-    db.students.delete(id);
-  }, []);
+    console.log("Deleting student ", id, " from period ", props.periodId, " while in delete mode: ", isDeleteMode);
+    isDeleteMode ? db.students.delete(id) : null;
+  }, [isDeleteMode]);
 
   return (
     <div className="max-w-4xl mx-auto mt-8">
@@ -32,6 +33,7 @@ export default function StudentList(props: { periodId: number }) {
           <StudentRow
             student={s}
             key={i}
+            onDelete={() => s.id ? deleteStudent(s.id) : null}
             update={(c: any) => {
               db.students.update(s.id, c).then((v) => console.log(c));
             }}
@@ -54,6 +56,7 @@ export default function StudentList(props: { periodId: number }) {
         <button // Enables delete mode for specific students (any Student name that is clicked on should be removed)
           className="button flex items-center justify-center"
           onClick={() => {
+            console.log("Delete mode is was: ", isDeleteMode);
             setIsDeleteMode(!isDeleteMode);
           }}
         ><DeleteIcon className="mr-2" />{isDeleteMode ? 'Exit Delete Mode' : 'Delete Mode'}</button>

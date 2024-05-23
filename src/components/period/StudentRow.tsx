@@ -13,6 +13,7 @@ import ConflictDialog from "./ConflictDialog";
 export default function StudentRow(props: {
   student: Student;
   update(c: any): void;
+  onDelete(): void;
 }) {
   const SEATING_TYPES = ["ANYWHERE", "SUPERVISION", "INSTRUCTION"];
   const RADIO_COLORS = ["rgb(132 204 22)", "rgb(239 68 68)", "rgb(59 130 246)"];
@@ -31,7 +32,7 @@ export default function StudentRow(props: {
   return (
     <div className="bg-slate-100 flex justify-between items-center">
       <div className="w-80 pl-4">
-        <p>{props.student.name}</p>
+        <p onClick={props.onDelete}>{props.student.name}</p>
       </div>
       <div className="flex items-center">
         <div>

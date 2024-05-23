@@ -133,7 +133,7 @@ export default function ConflictDialog(props: {
         return <StudentRow student={props.student} otherStudent={s} key={i} />;
       })}
       {/* <DialogActions>
-          <But autoFocus onClick={handleClose}>
+          <Button autoFocus onClick={handleClose}>
             Save changes
           </Button>
         </DialogActions> */}
