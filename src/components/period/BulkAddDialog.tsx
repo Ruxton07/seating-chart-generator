@@ -9,14 +9,27 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import StudentRow from "./StudentRow";
 
-export default function BulkAddDialog() {
+// Prop type for addStudent function
+interface BulkAddDialogProps {
+  addStudent: (studentName: string) => void;
+}
+
+export default function BulkAddDialog({ addStudent }: BulkAddDialogProps) {
   const [open, setOpen] = useState(false);
-
+  const [text, setText] = useState("");
   const close = () => setOpen(false);
 
-  const [text, setText] = useState("");
+  const handleConfirm = () => {
+    // Split text by new lines and trim each line
+    const studentNames = text.split('\n').map(name => name.trim());
+    studentNames.forEach(name => {
+      if (name) { //Check if name is not just whitespace
+        addStudent(name);
+      }
+    });
+    close(); // Close the dialog
+  }
   return (
     <>
       <Dialog open={open} onClose={close}>
@@ -53,7 +66,7 @@ export default function BulkAddDialog() {
           </DialogContent>
           <DialogActions>
             <p>This will add 5 students.</p>
-            <Button autoFocus onClick={() => {}}>
+            <Button autoFocus onClick={handleConfirm}>
               Confirm Bulk Add
             </Button>
           </DialogActions>

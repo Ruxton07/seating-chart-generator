@@ -52,18 +52,17 @@ export default function StudentList(props: { periodId: number }) {
         >
           Add Student
         </button>
-        <BulkAddDialog />
+        <BulkAddDialog addStudent={addStudent}/>
         <button // Enables delete mode for specific students (any Student name that is clicked on should be removed)
           className="button flex items-center justify-center"
           onClick={() => {
-            console.log("Delete mode is was: ", isDeleteMode);
             setIsDeleteMode(!isDeleteMode);
           }}
         ><DeleteIcon className="mr-2" />{isDeleteMode ? 'Exit Delete Mode' : 'Delete Mode'}</button>
         <button
           className="button flex items-center justify-center"
           onClick={() => {
-            const confirmation = prompt ("Are you sure you want to clear all students? This action is irreversible Type 'Clear' to confirm.");
+            const confirmation = prompt("Are you sure you want to clear all students? This action is irreversible Type 'Clear' to confirm.");
             if (confirmation === "Clear") {
               db.students.clear();
             } else {
